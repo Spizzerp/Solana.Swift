@@ -130,41 +130,47 @@ extension SolanaSocket: WebSocketDelegate {
     public func didReceive(event: WebSocketEvent, client: WebSocket) {
         log(event: event)
         switch event {
-        case .connected:
+        case .connected(let headers):
             delegate?.connected()
         case .disconnected(let reason, let code):
             delegate?.disconnected(reason: reason, code: code)
         case .text(let string):
             onText(string: string)
-        case .binary: break
-        case .ping: break
-        case .pong: break
-        case .viabilityChanged: break
-        case .reconnectSuggested: break
-        case .cancelled: break
-        case .error(let error): break
+        case .binary(let data):
+            break
+        case .pong(let data):
+            break
+        case .ping(let data):
+            break
+        case .error(let error):
             self.delegate?.error(error: error)
+        case .viabilityChanged(let isViable):
+            break
+        case .reconnectSuggested(let shouldReconnect):
+            break
+        case .cancelled:
+            break
         }
     }
 
     private func log(event: WebSocketEvent) {
         switch event {
         case .connected(let headers):
-            if enableDebugLogs { debugPrint("conected with headers \(headers)") }
+            if enableDebugLogs { debugPrint("connected with headers \(headers)") }
         case .disconnected(let reason, let code):
             if enableDebugLogs { debugPrint("disconnected with reason \(reason) \(code)") }
         case .text(let string):
             if enableDebugLogs { debugPrint("text \(string)") }
-        case .binary:
-            if enableDebugLogs { debugPrint("binary") }
-        case .ping:
-            if enableDebugLogs { debugPrint("ping") }
-        case .pong:
-            if enableDebugLogs { debugPrint("pong") }
-        case .viabilityChanged(let visible):
-            if enableDebugLogs { debugPrint("viabilityChanged \(visible)") }
-        case .reconnectSuggested(let reconnect):
-            if enableDebugLogs { debugPrint("reconnectSuggested \(reconnect)") }
+        case .binary(let data):
+            if enableDebugLogs { debugPrint("binary: \(data.count) bytes") }
+        case .ping(let data):
+            if enableDebugLogs { debugPrint("ping: \(data?.count ?? 0) bytes") }
+        case .pong(let data):
+            if enableDebugLogs { debugPrint("pong: \(data?.count ?? 0) bytes") }
+        case .viabilityChanged(let isViable):
+            if enableDebugLogs { debugPrint("viabilityChanged \(isViable)") }
+        case .reconnectSuggested(let shouldReconnect):
+            if enableDebugLogs { debugPrint("reconnectSuggested \(shouldReconnect)") }
         case .cancelled:
             if enableDebugLogs { debugPrint("cancelled") }
         case .error(let error):
